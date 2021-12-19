@@ -25,7 +25,12 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: Test
-        run: go test -race -v ./mosdns...
+        run: |
+          wget -qO${{ github.workspace }}/mosdns.zip https://api.github.com/repos/IrineSistiana/mosdns/zipball/$(wget -qO- -e https-proxy=127.0.0.1:12604 https://api.github.com/repos/IrineSistiana/mosdns/releases/latest | grep tag_name | awk '{print $2}' | sed 's/[",]//g')
+          unzip ${{ github.workspace }}/mosdns.zip -d ${{ github.workspace }}/mosdns
+          cp -rf ./mosdns/$(ls ./mosdns)/* ./mosdns
+          cd ${{ github.workspace }}/mosdns
+          go test -race -v ./mosdns...
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -34,9 +39,6 @@ jobs:
 
       - name: Build
         run: |
-          wget -qO${{ github.workspace }}/mosdns.zip https://api.github.com/repos/IrineSistiana/mosdns/zipball/$(wget -qO- -e https-proxy=127.0.0.1:12604 https://api.github.com/repos/IrineSistiana/mosdns/releases/latest | grep tag_name | awk '{print $2}' | sed 's/[",]//g')
-          unzip ${{ github.workspace }}/mosdns.zip -d ${{ github.workspace }}/mosdns
-          cp -rf ./mosdns/$(ls ./mosdns)/* ./mosdns
           cd ${{ github.workspace }}/mosdns
           python ./release.py
         env:
