@@ -43,9 +43,18 @@ jobs:
           python ./release.py
         env:
           CGO_ENABLED: '0'
-
+      - name: Generate release tag
+        id: tag
+        if: (!cancelled())
+        run: |
+          echo "::set-output name=release_tag::$(date +"%Y.%m.%d-%H%M")"
+          touch release.txt
+          [ $UPLOAD_COWTRANSFER = true ] && echo "🔗 [Cowtransfer](${{ steps.cowtransfer.outputs.url }})" >> release.txt
+          [ $UPLOAD_WETRANSFER = true ] && echo "🔗 [WeTransfer](${{ steps.wetransfer.outputs.url }})" >> release.txt
+          echo "::set-output name=status::success"
       - name: Publish
         uses: softprops/action-gh-release@v1
+        if: steps.tag.outputs.status == 'success' && !cancelled()
         with:
           files: '${{ github.workspace }}/mosdns/release/mosdns*.zip'
           prerelease: true
