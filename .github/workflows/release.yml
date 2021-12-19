@@ -25,7 +25,7 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: Test
-        run: go test -race -v ./...
+        run: go test -race -v ./mosdns...
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -33,14 +33,19 @@ jobs:
           python-version: '3.8'
 
       - name: Build
-        run: python ./release.py
+        run: |
+          wget -qO${{ github.workspace }}/mosdns.zip https://api.github.com/repos/IrineSistiana/mosdns/zipball/$(wget -qO- -e https-proxy=127.0.0.1:12604 https://api.github.com/repos/IrineSistiana/mosdns/releases/latest | grep tag_name | awk '{print $2}' | sed 's/[",]//g')
+          unzip ${{ github.workspace }}/mosdns.zip -d ${{ github.workspace }}/mosdns
+          cp -rf ./mosdns/$(ls ./mosdns)/* ./mosdns
+          cd ${{ github.workspace }}/mosdns
+          python ./release.py
         env:
           CGO_ENABLED: '0'
 
       - name: Publish
         uses: softprops/action-gh-release@v1
         with:
-          files: './release/mosdns*.zip'
+          files: '${{ github.workspace }}/mosdns/release/mosdns*.zip'
           prerelease: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
