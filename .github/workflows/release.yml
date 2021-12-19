@@ -30,7 +30,7 @@ jobs:
           unzip ${{ github.workspace }}/mosdns.zip -d ${{ github.workspace }}/mosdns
           cp -rf ./mosdns/$(ls ./mosdns)/* ./mosdns
           cd ${{ github.workspace }}/mosdns
-          go test -race -v ./mosdns...
+          go test -race -v ./...
 
       - name: Set up Python
         uses: actions/setup-python@v2
